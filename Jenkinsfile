@@ -6,6 +6,7 @@ pipeline {
         REMOTE_HOST = 'ec2-13-38-219-17.eu-west-3.compute.amazonaws.com'
         DOCKER_IMAGE = 'mattisavec2t/landing-page:v1'
         CONTAINER_NAME = 'landing-page-container'
+        DOCKER_HUB_CREDENTIALS_ID = 'docker-hub-credentials' 
     }
 
     stages {
@@ -15,6 +16,24 @@ pipeline {
                 git branch: 'master-aws',
                     url: 'https://github.com/mattisavec2t/landing-page-example'
                 sh 'ls -la'
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        
+                        echo "Construction de l'image..."
+                        sh "docker build -t ${DOCKER_IMAGE} ."
+                        
+                        echo "Connexion à Docker Hub..."
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                        
+                        echo "Push de l'image sur Docker Hub..."
+                        sh "docker push ${DOCKER_IMAGE}"
+                    }
+                }
             }
         }
 
@@ -45,7 +64,7 @@ EOF
             echo 'Déploiement Docker terminé avec succès ! ✅'
         }
         failure {
-            echo 'Erreur lors du déploiement SSH/Docker. ❌'
+            echo 'Erreur lors du pipeline. ❌'
         }
     }
 }

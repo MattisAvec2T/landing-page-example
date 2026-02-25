@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo 'Récupération du code source...'
                 git branch: 'main',
-                    url: 'https://github.com/TON_COMPTE/landing-page-example'
+                    url: 'https://github.com/mattisavec2t/landing-page-example'
                 sh 'ls -la'
             }
         }

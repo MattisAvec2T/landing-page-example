@@ -22,11 +22,16 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    // On utilise docker.withRegistry pour gérer le login/logout proprement
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_HUB_CREDENTIALS_ID}") {
-                        echo "Construction et Push de l'image..."
-                        def customImage = docker.build("${DOCKER_IMAGE}")
-                        customImage.push()
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_HUB_CREDENTIALS_ID}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        
+                        echo "Construction de l'image..."
+                        sh "docker build -t ${DOCKER_IMAGE} ."
+                        
+                        echo "Connexion à Docker Hub..."
+                        sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                        
+                        echo "Push de l'image sur Docker Hub..."
+                        sh "docker push ${DOCKER_IMAGE}"
                     }
                 }
             }

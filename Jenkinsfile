@@ -33,7 +33,7 @@ pipeline {
                             sudo docker run -d --name ${CONTAINER_NAME} -p 80:80 ${DOCKER_IMAGE}
                             
                             sudo docker image prune -f
-                        EOF
+EOF
                     """
                 }
             }
